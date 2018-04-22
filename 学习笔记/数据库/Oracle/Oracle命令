@@ -1,0 +1,64 @@
+Oracle命令：
+
+1、会话管理：
+	会话、连接、进程概念：
+		会话(session)  ：是通信双方从开始通信到通信结束期间的一个上下文(Context)。这个上下文是一段位于服务器端的内存：记录了本次
+						连接的客户端机器、通过哪个应用程序、哪个用户登录等信息；
+		连接(Connection):是从客户端到ORACLE实例的一条物理路径。连接可以在网络上建立，或者在本机通过IPC机制建立。通常会在客户端进
+						程与一个专用服务器或一个调度器之间建立连接。
+			会话和连接时同时建立的，两者是对同一件事情不同层次的描述。简单讲，连接时物理上的客户端同服务器的通信链路，会话是逻辑上
+		的用户同服务器的通信交互。
+			在一条连接上可以建立0个、一个或多个会话。各个会话是单独而且独立的，即使它们共享同一条数据库物理连接也是如此。一个会话中
+		的提交不会影响连接上的任何其他会话。实际上，还可以有链接而无相应的会话。另外，一个会话可以有连接也可以没有连接。使用高级Oracle
+		Net特性(如连接池)时，客户可以删除一条物理连接，而会话依然保留（但是会话会空闲）。客户在这个会话上执行某个操作时，它会重新建立
+		物理连接。
+			在专用服务器中，一个会话对应一个服务器进程（Process），如果数据库运行在共享服务器方式，一个服务器进程可以为多个会话服务。
+
+	查询会话参数：
+		1）使用show parameter命令
+			show parameter processes;
+		   	show parameter session;
+		2）查询v$parameter表
+			select * from v$parameter where name = 'sessions';
+		   	select * from v$parameter where name = 'processes';
+		3）查询v$resource_limit表;
+			select * from v$resource_limit;
+	设置会话数：
+		1）会话数和进程数的关系：
+			11g之前：sessions=(1.1 * processes) + 5
+			11g之后：sessions=(1.5 * processes) + 22
+		2）修改参数processes后，sessions参数也会随之变化（processes变小时例外）
+			alter system set processes=400 scope=spfile;
+			shutdown immediate;
+			startup;
+	会话状态：
+		ACTIVE,INACTIVE,KILLED,CASHED,SNIPED五个状态，一般常见的有ACTIVE,INACTIVE,KILLED三个状态
+		
+	查看当前会话数：
+		1）select * from v$session where username is not null	(其中Oracle内部进程的用户名为空)
+		2）
+	select count(*) from v$prodesses;
+
+
+
+2、结构管理：(参数必须为大写)
+	查看用户：
+		select * from dba_users		--查看数据库里面所有用户，前提是你是有dba权限的帐号，如sys,system
+		select * from all_users		--查看你能管理的所有用户
+		select * from user_users	--查看当前用户信息
+	查看表：
+		select * from dba_tables	--包括系统表
+		select * from all_tables	--所有用户的表 
+		select * from user_tables	--当前用户的表
+	查看表字段：
+		select * from user_tab_columns where Table_Name='用户表'							--当前用户下的表
+		select * from all_tab_columns where table_name='用户表' and owner='用户名'		--所有能管理的表
+		select * from dba_tab_columns where table_name='用户表' and owner='用户名'		--包括系统表
+	查看表注释：
+		select * from user_tab_comments where table_name='用户表'						--当前用户下的表
+		select * from all_tab_comments where table_name='用户表' and owner='用户名'		--所有能管理的表
+		select * from dba_tab_comments where table_name='用户表' and owner='用户名'		--包括系统表
+	查看字段注释：
+		select * from user_col_comments wehre table_name='用户表' and column_name='字段名'
+		select * from all_col_comments where table_name='用户表' and column_name='字段名' and owner='用户名'
+		select * from dba_col_comments where table_name='用户表' and column_name='字段名' and owner='用户名'

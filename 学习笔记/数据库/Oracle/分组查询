@@ -1,0 +1,47 @@
+分组查询语法
+select 		[column,] group function(column),....
+from 		table
+[where 		condition]
+[group by 	column]
+[having		group_codition]
+[order by 	column];
+
+1、关键字group by
+
+2、分类：avg 平均
+		sum 求和
+		max 最大
+		min 最小
+		count 总量
+		wm_concat 列转行
+
+3、筛选：having group_codition
+	注意：having和where的区别：	1）不能在where子句中使用组函数，能在having中使用组函数
+								2）都可作为结果集的筛选条件，having只能作用在组函数查询中
+								3）如果可以最好使用where查询，SQL优化：having-先分组后过滤，where-先过滤后分组
+	例：1）select deptno,avg(sal) 
+			from emp 
+			group by deptno 
+			having avg(sal) > 2000;
+		2）select deptno,avg(sal) 
+			from emp 
+			where deptno = 20 
+			group by deptno;
+
+4、分组函数嵌套
+	例：select max(avg(sal)) 
+		from emp 
+		group by deptno;
+
+5、group by增强 group by rollup(a,b) 等价于 group by a,b + group by a + group null
+	select deptno,job,sum(sal) from emp group by deptno,job;
+	+
+	select deptno,sum(sal) from emp group by deptno;
+	+
+	select sum(sal) from emp;
+	等于
+	select deptno,job,sum(sal) from emp group by rollup(deptno, job);
+	
+6、SQL plus 报表
+	break on column skip 2 相同column值不显示，不同的column值跳过两行
+	set pagesize 30 设置页面显示行数

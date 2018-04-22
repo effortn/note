@@ -1,0 +1,45 @@
+案例分析：
+1、分页查询：rownum只能<、<=，不能>，>=
+	案例要求：分页查询员工姓名、薪水，要求按照薪水降序排列，分页查询每页4条数据，显示第二页
+	案例实现：	select rownum, r, empno, ename, sal 
+				from (select empno, ename, sal, rownum r
+						from (select empno,ename,sal from emp order by sal) e1 
+						where e1.rownum<=8) e2
+				where r >= 5
+
+2、子查询和连接查询：
+	案例要求：找到员工表中薪水大于本部门平均薪水的员工
+	案例实现：1）连接查询：select e.empno,e.ename,e.sal, b.avgsal 
+						from emp e, (select avg(sal) avgsal avgsal, deptno from emp d where d.deptno=e.deptno) b  
+						where e.deptno = b.deptno and e.sal > b.avgsal
+
+			 2）相关子查询：select e.empno,e.name,e.sal,(select avg(sal) from emp group by deptno) avgsal
+			 				from emp e
+			 				where sal > (select avg(sal) from emp where deptno=e.deptno)
+
+	案例深析：生成执行计划：explain plan for SQL
+			 查看执行计划：select * from table(dbms_xplain.display)
+			 相关子查询更优
+
+3、子查询和函数：别名如果是纯数字，必须加双引号
+	  案例要求：按照部门统计员工人数，并按照入职年份为列显示
+	  案例实现：1）decode函数：select count(*), 
+	  								sum(decode(to_char(hiredate, 'yyyy'),'1980',1,0)) "1980",
+	  								sum(decode(to_char(hiredate, 'yyyy'),'1981',1,0)) "1981",
+	  								sum(decode(to_char(hiredate, 'yyyy'),'1982',1,0)) "1982",
+	  								sum(decode(to_char(hiredate, 'yyyy'),'1987',1,0)) "1987"
+	  						  from emp;
+
+	  		   2)子查询：select (select count(*) from emp) Total,
+	  		   				    (select count(*) from emp where to_char(hiredate, 'yyyy') = '1980') "1980",
+	  		   				    (select count(*) from emp where to_char(hiredate, 'yyyy') = '1981') "1981",
+	  		   				    (select count(*) from emp where to_char(hiredate, 'yyyy') = '1982') "1982",
+	  		   				    (select count(*) from emp where to_char(hiredate, 'yyyy') = '1987') "1987"
+	  		   		    from dual(伪表);
+
+4、练习：
+	select ci_id,wm_concat(stu_name)
+	from (select ci_id,stu_name 
+		 from (select ci_id,stu_ids from pm_ci) c, pm_stu s 
+		 where instr(c.stu_ids, s.stu_id) > 0) e
+	group by ci_id

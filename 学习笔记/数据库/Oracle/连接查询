@@ -1,0 +1,43 @@
+连接查询语法
+select		column...
+from 		table a, table b....
+where 		codition
+
+1、笛卡尔积：
+	总量为表A总量*表B总量，应加入有效的连接条件，避免笛卡尔全集，条件至少为涉及到表的数量减一
+
+2、等值连接：连接条件相等
+	例：select e.depno,e.empno,e.ename,d.depname 
+		from emp e,dep d 
+		where e.depno = d.depno
+
+3、不等值连接：连接条件不相等
+	例：select e.empno,e.ename,e.sal,s.grade 
+		from emp e,salgrade s 
+		where e.sal between s.losal and s.hisal
+
+4、外连接：通过外连接，把对于连接条件不成立的记录，仍然包含在最后的结果中
+	1）左外连接：当连接条件不成立的时候，等号左边的表仍然被包含
+		例：select d.deptno 部门号,d.dnam 部门名称,count(e.empno) 人数 
+			from dept d,emp e 
+			where d.deptno = e.deptno(+)
+			group by d.deptno,d.dname
+	2）右外连接：当连接条件不成立的时候，等号右边的表仍然被包含
+		例：select d.deptno 部门号,d.dnam 部门名称,count(e.empno) 人数 
+			from emp e, dept d 
+			where e.deptno(+)= d.deptno 
+			group by d.deptno,d.dname
+
+5、自连接：通过别名，将同一张表视为多张表
+	例：select e.ename 员工姓名,b.name 老板姓名
+		from emp e, emp b
+		where e.mgr = b.empno;
+	存在问题：不适合大表
+	解决办法：层次查询（单表查询）
+
+6、层次查询：按照某种连接条件查询记录及记录所在的层次
+	例：select ename, empno, mgr, level(伪列)
+		from emp
+		connect by prior(上一层) empno = mgr
+		start with mgr is null
+		order by 4

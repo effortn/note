@@ -1,0 +1,79 @@
+存储函数和存储过程：
+	1）概念：指存储在数据库中供所有用户程序调用的子程序叫存储过程、存储对象
+	2）语法：
+		create [or replace] procedure 过程名(参数列表)
+		as		说明部分		
+		PLSQL子程序体;
+
+		create [or replace] function 函数名(参数列表)
+		return	
+		as		说明部分
+		PLSQL子程序体;
+	3）相同点：完成特定功能
+	    区别：是否用return语句返回值（都可以指定一个或多个out值）
+
+1、存储过程：
+	1）例子：
+		create or replace procedure empsal(dno in number)
+		as
+		    cursor cemp is select * from emp where deptno = dno;
+		    empinfo emp%rowtype;
+		begin
+		    open cemp;
+		        loop
+		            fetch cemp into empinfo;
+		            exit when cemp%notfound;
+		            DBMS_OUTPUT.PUT_LINE(empinfo.ename||'  '||empinfo.sal);
+		        end loop;
+		    close cemp;
+		end;
+		/
+	2）调用：
+		SQLplus：EXEC EMPSAL(10);
+		PLSQL程序：	DECLARE
+					  DNO NUMBER;
+					BEGIN
+					  DNO := 10;
+
+					  EMPSAL(
+					    DNO => DNO
+					  );
+					END;
+	3）调试存储过程权限：
+		DEBUG CONNECT SESSION 和 DEBUG ANY PROCEDURE
+		本机认证登录：sqlpuls / as sysdba
+
+2、存储函数：
+	1）例子：
+		create or replace function empsalinfo(eno in number)
+		return  emp.sal%type
+		as
+		    esal emp.sal%type;
+		    ecomm emp.comm%type;
+		begin
+		    select sal,comm into esal,ecomm from emp where empno = eno;
+		    
+		    DBMS_OUTPUT.PUT_LINE('查询完毕');
+		    return esal*12 + nvl(ecomm,0);
+		end;
+		/
+	2）调用：
+		SQLplus：select scott.empsalinfo(7392) from dual;
+		PLSQL程序：	DECLARE
+					  ENO NUMBER;
+					  v_Return NUMBER;
+					BEGIN
+					  ENO := NULL;
+
+					  v_Return := EMPSALINFO(
+					    ENO => ENO
+					  );
+					  /* Legacy output: 
+					DBMS_OUTPUT.PUT_LINE('v_Return = ' || v_Return);
+					*/ 
+					  :v_Return := v_Return;
+					--rollback; 
+					END;
+
+3、in和out参数
+	原则：如果只有一个返回值，用存储函数；否则，就用存储过程

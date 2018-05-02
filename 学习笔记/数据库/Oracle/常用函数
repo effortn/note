@@ -10,6 +10,7 @@ Oracle常用函数作用：
 	幂运算：POWER(m,n)
 	平方根：SQRT(n)
 	三角函数：SIN(n)	  ASIN(n)等
+	取值小的数：least(n,m[,x,y....])
 
 2、字符函数：
 	大小写转换：UPPER(char)	LOWER(char)	  INITCAP(char)
@@ -18,10 +19,12 @@ Oracle常用函数作用：
 	获取字符串长度：LENGTH(char)
 	去除子串函数：TRIM([char1 FROM ]char2)	LTRIM(char1[,char2]) RTRIM(char1[,char2])
 	替换字符串：REPLACE(char,s_string[,r_string])	
+	查看字符所在位置函数：instr(char1,char2[,index_begin])
 
 3、日期函数
 	日期添加：ADD_MONTHS(date,i)
 	某月最后一天：LAST_DAY(date)
+	下一个日期：NEX_DAY(date,char)
 	月份差：MONTH_BETWEEN(date1,date2)
 	日期部分提取：EXTRACT(date FROM datetime)
 
@@ -31,4 +34,6 @@ Oracle常用函数作用：
 	TO_NUMBER(char[,fmt])
 	TO_DATE(char[,fmt])
 
-	
+5、其他函数
+	1）decode(条件,值1,返回值1,值2,返回值2,...值n,返回值n,缺省值
+	2）distinct column：去重

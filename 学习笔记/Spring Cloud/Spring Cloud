@@ -1,0 +1,49 @@
+Spring Cloud
+
+1、架构：
+	1）微服务特点
+		一系列微小的服务共同组成
+		跑在自己的进程里
+		每个服务为独立的业务开发
+		独立部署
+		分布式的管理
+
+	2）架构演变：
+		单一应用架构 --> 垂直应用架构 --> 分布式服务架构 --> 流动计算架构
+
+	3）分布式定义
+		旨在支持应用程序和服务的开发，可以利用物理架构，由多个自治的处理元素，不共享主内存，但通过网络发送消息合作。
+
+	4）微服务架构的基础框架/组件
+		服务注册发现：服务的注册和发现，服务内部通讯
+		服务网关（Service Gateway）：服务对外暴露，对外屏蔽服务细节、路由外部请求至具体微服务、限流容错、请求监控（用户校验、反爬虫机制等）
+		后端通用服务（也称中间层服务Middle Tier Service）：注册至服务注册表，供前端服务调用
+		前端服务（也称边缘服务Edge Service）： 对后端服务进行裁剪和聚合
+
+	5）微服务实现两种方式
+		阿里系：
+			-Dubbo：服务治理
+			-Zookeeper：服务注册中心
+			-SpringMVC or SpringBoot：底层实现
+			-...
+		Spring Cloud:
+			-Spring Cloud Netflix Eureka
+			-SpringBoot
+			-...
+
+2、Spring Cloud简介
+	1）Spring Cloud是一个开发工具集，含了多个子项目
+		-利用Spring Boot的开发便利
+		-主要是基于对Netflix开源组件的进一步封装
+
+	2）Spring Cloud简化了分布式开发（掌握如何使用，更要理解分布式、架构的特点）
+
+3、Spring Cloud Eureka
+	1）基于Netflix Eureka做了二次封装
+
+	2）两个组件组成
+		-Eureka Server 注册中心（维持心跳连接、检测服务）
+		-Eureka Client 服务注册（简化与服务器的交互、轮询负载均衡器、提供服务故障切换）
+
+	3）代码
+		注解：EnableEurekaServer（注册服务注解）

@@ -35,8 +35,7 @@ SQL技巧：
 				row_number函数：row_number() over(order by column asc)先对列column按照升序，再为每条记录返回一个序列号;row_number() over(			partition by column1 order by column2 asc) 先按照column1分组，再对分组后的数据进行以column2升序排列
 					with tmp as (select a.user_name,b.timer,b.kills,row_number() over(partition by a.user_name order by b.kills) cnt from user1 a join user_kills b on a.id = b.user_id) select * from tmp where cnt <= 2
 				连接查询：select name, kills, timer from (select a.name,b.kills,b.timer,(select count(*) from user_kills c where 			c.user_id = b.user_id and c.kills >= b.kills) as cnt from user1 a,user_kills b where a.id = b.user_id) where cnt 		<=2;
-						select name, timer, kills from user1 c,(select a.user_id,a.timer,a.kills,count(*) cnt from user_kills a join 
-					user_kills b on b.user_id = a.user_id where a.kills <= b.kills group by a.user_id,a.timer,a.kills order by a.user_id) d where c.id = d.user_id and d.cnt <3;
+					2/  select name, timer, kills from user1 c,(select a.user_id,a.timer,a.kills,count(*) cnt from user_kills a join user_kills b on b.user_id = a.user_id where a.kills <= b.kills group by a.user_id,a.timer,a.kills order by a.user_id) d where c.id = d.user_id and d.cnt <3;
 
 2、其他优化：
 	1）行转列：

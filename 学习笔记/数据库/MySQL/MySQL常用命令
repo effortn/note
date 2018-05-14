@@ -1,0 +1,9 @@
+MySQL常用命令
+1/修改用户密码
+	| update user set authentication_string=passworD("test") where user = 'user'
+	| ALTER USER 'root'@'localhost' IDENTIFIED BY 'MyNewPass4!'
+2/忘记root密码
+	1) 修改配置/etc/my.cof [mysqld]中加入--skip-grant-tables
+	   重启服务，登陆root
+	   修改密码，重启服务
+

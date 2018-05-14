@@ -36,9 +36,8 @@ Oracle命令：
 		
 	查看当前会话数：
 		1）select * from v$session where username is not null	(其中Oracle内部进程的用户名为空)
-		2）
-	select count(*) from v$prodesses;
-
+		2）select count(*) from v$prodesses;
+		3
 
 
 2、结构管理：(参数必须为大写)
@@ -51,7 +50,7 @@ Oracle命令：
 		select * from all_tables	--所有用户的表 
 		select * from user_tables	--当前用户的表
 	查看表字段：
-		select * from user_tab_columns where Table_Name='用户表'							--当前用户下的表
+		select * from user_tab_columns where Table_Name='用户表'					--当前用户下的表
 		select * from all_tab_columns where table_name='用户表' and owner='用户名'		--所有能管理的表
 		select * from dba_tab_columns where table_name='用户表' and owner='用户名'		--包括系统表
 	查看表注释：

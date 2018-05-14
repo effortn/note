@@ -1,0 +1,37 @@
+Spring Boot 2.0
+
+1、Spring Boot简介
+	Spring Boot 的角色
+		Spring Frame --> Spring Boot --> Spring Cloud
+	2.0新特性
+		编程语言：Java 8+、 Kotlin
+		底层框架：Spring Framework 5.0.x
+		全新特性：Web Flux(函数式编程：Java 8 Lambda,响应编程：Reactive Streams，异步编程Servlet 3.1或Asyc NIO)
+	环境准备：JDK Maven	IDEA
+
+2、应用构建
+	1）简单实现
+		编写REST程序
+		运行Spring Boot应用
+		使用HTTP请求工具：PostMan
+	2）实现Web Flux
+		Flux：类似集合
+		Mono：类似Optional
+
+3、深度实践
+	1）maven命令构建Spring Boot
+
+	2）多模块Spring Boot项目
+		重构：
+			| 调整主（父）工程类型（<packaging>）
+			| 创建子模块工程（<module>）
+				模型层：model
+				持久层：persistence
+				表示层：web
+			| 子模块依赖管理（<dependecyManagement>）
+		编码：
+
+		项目打包：
+			| jar包：
+				pom:<configuration><mainClass></configuration></mainClass>
+				mvn -Dmaven.test.skip -U clean package

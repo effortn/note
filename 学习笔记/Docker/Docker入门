@@ -1,0 +1,98 @@
+Docker入门
+1、Docker简介
+	- 可以粗糙的理解为轻量级的虚拟机
+			VM vs Docker
+		App A  			
+		Bins/Libs 		App A
+		Guest OS		Bins/Libs
+		Hypervisor 		Docker Engine
+		Host OS			Host OS
+		Server 			Server
+	- 开挂的chroot
+	- docker 安装
+		| Linux：sudo wget -pO- https://get.docker.com | sh
+				 sudo usermod -G docker user
+	- docker架构
+		客户端/Client  -->  守护进程/Docker daemon  -->  镜像仓库/Registry
+		  				容器/Contariners		镜像/images
+	- docker命令
+		docker pull		获取image
+		docker build 	创建image
+		docker images	列出image
+		docker run 		运行container
+		docker ps		列出container
+		docker rm		删除container
+		docker rmi		删除image
+		docker cp 		在host和container之间copy文件
+		docker commit	保存改动为新的image
+		docker inspect	检查
+		docker login 	登录
+
+2、镜像与容器
+	Dockerfile：通过编写简单的文件自创docker镜像
+		FROM alpine:latest			--基础镜像
+		MAINTAINER en 				--显示作者
+		CMD echo 'hello docker' 	--具体操作
+	Dockerfile语法
+		FROM		base image
+		RUN 		执行命令
+		ADD 		添加文件
+		COPY 		拷贝文件
+		CMD 		执行命令
+		EXPOSE 		暴露端口
+		WORKDIR		指定路径
+		MAINTAINER	维护者
+		ENV 		设定环境变量
+		ENTRYPOINT 	容器入口
+		USER 		指定用户
+		VOLUME 		mount point
+	镜像分层
+		Dockerfile中的每一行都产生一个新层
+		RO：已经存在image的命令是只读的
+		RW(container layer)：运行态的image是可读可写的
+		分层好处：images不同的分层有可能会共享，减少服务器压力
+
+3、容器存储
+	Volume：提供独立于容器之外的持久化存储，可以通过Volume进行持久化的映射操作
+		1）docker run -v /usr/share/nginx/html nginx(image目录直接映射/挂载)
+		2）docker run -v $PWD/html:/usr/share/nginx --name nginx -d -p 8190:80 nginx(本地目录映射/挂载)
+		3）docker create -v $PWD/data:/var/myData --name data_container ubuntu
+		   docker run -it --volume-from data_container ubuntu /bin/bash(把一个容器的目录映射/挂载至另一个容器)
+		注：默认挂载的只是image的mount属性中的destination目录
+
+4、Registry
+	术语
+		English		中文
+		host 		宿主机
+		image 		镜像
+		container 	容器
+		rigistry 	仓库
+		daemon 		守护程序
+		client 		客户端
+	命令
+		docker search whalesay
+		docker pull whalesay
+		docker push myname/whalesay
+	仓库
+		dockerhub | daocloud | 时速云 | aliyun 
+		镜像网站：hub.docker.com
+
+5、多容器app
+	docker-compose:
+		curl -k -L https://github.com/docker/compose/releases/download/1.9.0/docker-compose-$(uname -s)-$(uname -m) > docker-compose
+		chmod a+x docker-compose
+	docker-compose.yaml内容:
+		ghost-app
+		  build: ghost
+		  depends_on:
+		    -db
+		  ports:
+		    -"2368:2368"
+		nginx:
+		  build: nginx
+		  ports:
+		    -"80:80"
+		  depends_on:
+		    -ghost-app
+		db:
+		  image: "mysql:5.7.15"

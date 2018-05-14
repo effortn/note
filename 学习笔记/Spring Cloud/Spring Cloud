@@ -9,7 +9,7 @@ Spring Cloud
 		分布式的管理
 
 	2）架构演变：
-		单一应用架构 --> 垂直应用架构 --> 分布式服务架构 --> 流动计算架构
+		单一应用架构/ORM --> 垂直应用架构/MVC --> 分布式服务架构/RPC --> 流动计算架构/SOA
 
 	3）分布式定义
 		旨在支持应用程序和服务的开发，可以利用物理架构，由多个自治的处理元素，不共享主内存，但通过网络发送消息合作。
@@ -45,5 +45,85 @@ Spring Cloud
 		-Eureka Server 注册中心（维持心跳连接、检测服务）
 		-Eureka Client 服务注册（简化与服务器的交互、轮询负载均衡器、提供服务故障切换）
 
-	3）代码
+	3）EurekaServer
 		注解：EnableEurekaServer（注册服务注解）
+		依赖：spring-cloud-starter-netflix-eureka-server
+		高可用：EurekaServer相互注册、EurekaClient多方注册
+
+	4）EurekaClient
+		注解：EnabelDiscoveryClient（服务提供者注解）
+		依赖：spring-cloud-starter-netflix-eureka-client（spring-boot-starter-web）
+
+	5）Eureka总结
+		- @EnableEurekaServer @EnableEurekaClient
+		- 心跳检测、健康检查、负载均衡等功能
+		- Eureka的高可用，生产上建议至少两台以上
+		- 分布式系统中，服务注册中心是最重要的基础部分
+		- 服务发现方式：客户端发现/服务端(代理)发现
+			客户端发现：Eureka
+			服务端发现：Nginx	 	ZooKeeper 	 Kubernetes
+		- 微服务的特点：异构
+			| 不同语言
+			| 不同类型的数据库
+		- SpringCloud的服务调用方式
+			| REST or RPC？
+			| 实现EurekaClient
+
+4、微服务拆分
+	1）如何拆分
+		- 先明白起点和终点
+			| 既有架构的起点
+			| 好的架构不是设计出来的，而是进化而来的
+			| 一直在演进ing
+		- 需要考虑的因素与坚持的原则
+			| 业务形态不适合上微服务
+				- 系统中包含很多很多强事务场景
+				- 业务相对稳定，迭代周期长
+				- 访问压力不大，可用性要求不高
+			| 康威定律：任何组织在设计一套系统（广义概念上的系统）时，所交付的设计方案在结构上都与该组织的沟通结构保持一致
+
+	2）服务拆分的方法论
+		- 扩展立方模型（Scale Cube）
+			| X轴 水平复制
+			| Z轴 数据分区
+			| Y轴 功能解耦
+		- 如何拆"功能"
+			| 单一职责，松耦合、高内聚
+			| 关注点分离（职责、通用性、粒度级别）
+		- 服务和数据的关系
+			| 先考拆分业务功能，在考虑拆分对应的数据
+			| 无状态服务
+			| 每个微服务都有单独的数据存储
+			| 依据服务特点选择不同结构的数据库类型
+			| 难点在确定边界
+		- 拆分设计
+			| 针对边界设计API
+			| 依据边界权衡数据冗余
+
+5、应用通信
+	1）HTTP vs RPC
+		- Dubbo（RPC框架）
+		- Spring Cloud（restful调用：RestTemplate、Feign）
+
+	2）RestTemplate
+		- 直接使用RestTemplate，URL写死
+		- 利用loadBalancerClient通过应用名获取URL，然后再使用RestTemplate
+		- 利用@LoadBalanced，可在RestTemplate里使用应用名字
+
+	3）Feign
+		前置：依赖、 @EnableFeignClient、 声明调用服务和方法
+		- 声明式REST客户端（伪RPC）
+		- 采用了基于接口的注解
+
+	4）客户端负载均衡器：Ribbon
+		- RestTemplate、 Feign、 Zuul(网关服务)
+		- 实现负载均衡核心：
+			| 服务发现
+			| 服务选择规则
+			| 服务监听
+		- 主要组件
+			| ServerLIst
+			| IRule
+			| ServerListFilter
+
+	5）多模块开发

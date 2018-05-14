@@ -106,3 +106,110 @@ Linux网络管理
 			- 国家或地区域
 		- 二级域 						imooc Microsoft IBM
 		- 主机名	 							www    NEWS 
+	3）DNS查询过程（访问www.imooc.com.cn过程
+		DNS客户机  -->	本地域名服务器 -->  根DNS服务器
+									  -->  cn
+									  -->  com.cn
+									  -->  imooc.com.cn
+				   -->	Web服务器（www.imooc.com.cn）
+	4）DNS查询类型
+		| 从查询方式上分
+			- 递归查询：要么做出查询成功响应，要么作出查询失败的响应。一般客户机和服务器之间属递归查询，即当客户机向DNS服务器发出请求后，若DNS服务器本身不能解析，则会向另外的DNS服务器发出查询请求，得到结果后转交给客户机
+			- 迭代查询：服务器收到一次迭代查询回复一次结果，这个结果不一定是目标IP与域名的映射关系，也可以是其他DNS服务器的地址
+		| 从查询内容上分
+			- 正向查询由域名查找IP地址
+			- 反向由IP地址查找域名
+
+6、网关作用
+	1）概念：
+		| 网关（Gateway）又称网间连接器、协议转换器。
+		| 网关在网络层上实现网络互连，是最复杂的网络互连设备，仅用于两个高层协议不同的网络互连。
+		| 网关既可以用于广域网互连，也可以用于局域网互连。
+		| 网关是一种充当转换重任的服务器或路由器。
+	2）网关的作用：
+		- 网关在所有内网计算机访问的不是本网段的数据报时使用
+		- 网关负责将内网IP转换为公网IP，公网IP转换为内网IP
+
+7、Linux网络配置
+	1）Linux配置IP地址
+		- ifconfig命令临时配置IP地址
+			| ifconfig命令：查看与配置网络状态命令
+			| ifconfig eth0 192.168.0.200 netmask 255.255.255.0
+				#临时设置eth0网卡的IP地址与子网掩码
+		- setup工具永久配置IP地址
+			| 红帽专有图形化工具setup
+				#自动获取IP地址需要DHCP服务
+		- 修改网络配置文件
+			| 网卡信息文件
+				vi /etc/sysconfig/network-scripts/ifcfg-eth0
+				DEVICE=eth0 				网卡设备名
+				BOOTPROTO=none				是否自动获取IP(none、static、dhcp)
+				HWADDR=00:0c:29:17:c4:09	MAC地址
+				NM_CONTROLLED=yes 			是否可以由Network Manager图形管理工具托管
+				ONBOOT=yes 					是否随网络服务启动，eth0生效
+				TYPE=Ethernet 				类型为以太网
+				UUID="44b76c8a-b59f-44..."	唯一标识码
+				IPADDR=192.168.0.252		IP地址
+				NETMASK=255.255.255.0		子网掩码
+				GATEWAY=192.168.0.1			网关
+				DNS1=202.206.0.20			DNS
+				IPV6INIT=no 				IPv6没有启用
+				USERCTL=no 					不予许非root用户控制此网卡
+			| 主机名文件
+				vi /etc/sysconfig/network
+				NETWORKING=yes
+				HOSTNAME=localhost.localdomain
+				hostname [主机名]
+				#查看与临时设置主机名命令
+			| DNS配置文件
+				vi /etc/resolv.conf
+					nameserver 202.106.0.20 [...]
+					search localhost
+		- 图形界面配置IP地址
+			略
+
+	2）虚拟机网络配置
+		1 配置LinuxIP地址
+			setup 	#修改并配置IP地址
+		2 启动网卡
+			vi /etc/sysconfig/network-script/ifcfg-eth0
+				把	 ONBOOT=no
+				改为  ONBOOT=yes
+			server network restart 	#重启网络服务
+		3 修改UUID
+			| vi /etc/sysconfig/network-script/ifcfg-eth0	#删除MAC地址行
+			| rm -rf /etc/udev/rules.d/70-persistent-net.rules	#删除网卡和MAC地址绑定文件
+			| 重启动系统
+		4 设置虚拟机网络连接方式
+		5 修改桥接网卡
+
+8、Linux网络命令
+	1）网络环境查看命令
+		1 ifconfig命令
+			查看与配置网络连接命令
+		2 关闭与启动网卡
+			ifdown 网卡设备名 	#禁用改网卡设备
+			ifup 网卡设备名		#启用改网卡设备
+		3 查询网络状态
+			netstat 选项
+				-t：列出TCP协议端口
+				-u：列出UDP协议端口
+				-n：不使用域名与服务名，而使用IP地址和端口号
+				-l：仅列出在监听状态网络服务
+				-a：列出所有的网络连接
+			统计远程连接数量命令：
+				netstat -an | grep ESTABLISHED | wc -l
+			netstat -rn
+				-r：列出路由列表，功能和route命令一致
+		4 route命令
+			route -n
+				#查看路由列表(可以看到网关)
+			route add default gw 192.168.1.1
+				#临时设定网关
+			注意：在一台服务器里，连内网的网卡是不能设置网关的
+		5 域名解析命令
+			nslookup [主机名或IP]
+				#进行域名与IP地址解析
+			neslookup
+			> server
+				#查看本机DNS服务器

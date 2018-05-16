@@ -157,10 +157,10 @@ Linux网络管理
 				USERCTL=no 					不予许非root用户控制此网卡
 			| 主机名文件
 				vi /etc/sysconfig/network
-				NETWORKING=yes
-				HOSTNAME=localhost.localdomain
+					NETWORKING=yes
+					HOSTNAME=localhost.localdomain
 				hostname [主机名]
-				#查看与临时设置主机名命令
+					#查看与临时设置主机名命令
 			| DNS配置文件
 				vi /etc/resolv.conf
 					nameserver 202.106.0.20 [...]
@@ -213,3 +213,7 @@ Linux网络管理
 			neslookup
 			> server
 				#查看本机DNS服务器
+
+	2）Linux网络测试命令
+		1 ping命令
+			

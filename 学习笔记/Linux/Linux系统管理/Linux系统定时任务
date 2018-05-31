@@ -1,0 +1,86 @@
+Linux系统定时任务
+1、at一次性定时任务
+	1）确定at安装
+		| chkconfig --list | grep at
+		| service atd start
+	2）at的访问控制
+		| 如果系统中有/etc/at.allow文件，那么只有写入/etc/at.allow中的用户可以使用(/etc/at.deny文件会被忽略)
+		| 如果系统中只有/etc/at.deny文件，那么写入此文件的用户不能使用at命令。对root不起作用
+		| 如果两个文件都不存在，那么只用root用户可以使用at命令
+	3）at命令
+		| at [选项] 时间
+			选项：
+				-m：当at工作完成后，无论是否命令有输出，都用email通知执行at命令的用户
+				-c 工作号：显示该at工作的实际内容
+			时间：
+				- HH:MM
+				- HH:MM YYYY-MM-DD
+				- HH:MM[am|pm] [month] [date]
+				- HH:MM[am|pm] + [minutes|hours|days|weeks]
+			例子：
+				at now +2 minutes
+				at> /root/hello.sh >> /root/hello.log
+	4）其他at管理命令
+		| atq
+			#查询当前服务器上的at工作
+		| atrm [工作号]
+			#删除指定的at任务
+
+2、crontab循环定时任务
+	1）crond服务管理
+		| service crond restart
+		| chkconfig crond on
+	2）crond访问控制
+		| 如果系统中有/etc/cron.allow文件，那么只有写入/etc/cron.allow中的用户可以使用(/etc/cron.deny文件会被忽略)
+		| 如果系统中只有/etc/cron.deny文件，那么写入此文件的用户不能使用cron命令。对root不起作用
+		| 如果两个文件都不存在，那么只用root用户可以使用cron命令
+	3）用户的crontab设置
+		| crontab [选项]
+			-e：编辑crontab定时任务
+			-l：查询crontab任务
+			-r：删除当前用户所有的crontab任务
+		| crontab -e
+			#进入crontab编辑界面。会打开vim编辑你的工作
+			* * * * * 执行的任务
+			项目			含义						范围
+			第一个*		一小时当中的第几分钟		0-59
+			第二个*		一天当中的第几个小时		0-23
+			第三个* 		一个月当中的第几天		1-31
+			第四个*		一年当中的第几月			1-12
+			第五个* 		一周当中的星期几			0-7(0和7都代表星期日)
+			特殊符号		含义
+			*			代表任何时间
+			,			代表不连续的时间。比如"0 8,12 * * *"，代表每天的8点0分，12点0分都执行一次
+			- 			代表连续的时间范围。比如"0 5 * * * 1-6"代表周一到周六的凌晨5点0分执行
+			*/n 		代表每隔多久执行一次。比如"*/10 * * * *"，代表每隔10分钟就执行一次
+	4）crontab注意事项
+		| 六个选项都不能为空，必须填写。如果不确定使用"*"代表任意时间
+		| crontab定时任务，最小有效时间是分钟，最大有效时间是月
+		| 在定义时间时，日期和星期最好不要在一条定时任务中
+		| 在定时任务中，不管是直接写命令，还是在脚本中写命令，最好都用绝对路径
+
+3、系统的crontab
+	1）系统的定时任务
+		"crontab -e"是每个用户执行的命令，也就是说不通的用户身份可以执行自己的定时任务，可是有些定时任务需要系统执行，这是就需要编辑/etc/crontab这个配置文件了
+	2）执行系统的定时任务的方法
+		| 第一种是把需要定时执行的脚步复制到
+			/etc/cron.{hourly,daily,weekly,monthly}目录中的任意一个
+		| 第二种是修改/etc/crontab配置文件
+
+4、anacron配置
+	1）anacron是什么
+		anacron是用来保证在系统关机的时候错过的定时任务，可以在系统开机之后再执行
+	2）anacron检测周期
+		| 一天，七天，一个月为检测周期
+		| 在系统的/var/spool/anacron目录中存在cron.{daily,weekly,monthly}文件，用于记录上次执行cron的时间
+		| 和当前时间做比较，如果两个时间的差值超过了anacron的指定时间差值，证明有cron任务被漏执行
+	3）anacron配置文件
+		vi /etc/anacrontab
+			- RANDOM_DELAY=45
+				#最大随机延迟
+			- START_HOURS_RANGE=3-22
+				#anacron的执行时间范围是3:00-22:00
+			- 1		5	cron.daily 		nice run-parts /etc/cron.daily
+			- 7 	25	cron.weekly		nice run-parts /etc/cron.weekly
+			-@monthly 45 cron.monthly 	nice run-parts /etc/cron.monthly
+			#天数 强制延迟(分) 工作名称 实际执行命令

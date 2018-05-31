@@ -1,0 +1,99 @@
+Linux服务管理
+
+1、简介与分类
+	1）系统运行级别
+		运行级别：
+			0	关机
+			1	单用户模式，可以想象为Windows的安全模式，主要用于系统修复
+			2	不完全的命令行模式，不含NFS服务
+			3	完全的命令行模式，就是标准字符界面
+			4	系统保留
+			5	图形模式
+			6	重启动
+		运行级别命令：
+			| runlevel  #查看运行级别	(上次、目前)
+			| init 运行级别 	#修改运行级别命令
+		系统默认运行级别：
+			| vim /etc/inittab
+				- id:3:initdefault: #系统开机后直接进入哪个运行级别(Centos 7之后设置无效，需要systemctl set-default设置)
+	2）服务的分类
+		RPM包默认安装的服务
+			独立的服务
+			基于xinetd服务
+		源码包安装的服务
+		| 源码包和RPM包安装之后的区别是按照位置不同
+	3）服务的启动和自启动：
+		略
+	4）查询已安装的服务
+		RPM包安装的服务
+			chkconfig --list #查看服务自启动状态，可以看到所有RPM包安装的服务
+		源码包安装的服务
+			查看服务安装位置，一般是/usr/local下
+	5）服务与端口
+		端口与服务的对应：
+			/etc/services
+		查询系统中开启的服务
+			| netstat -tlunp
+				-t 列出tcp数据
+				-u 列出udp数据
+				-l 列出正在监听的网络服务(不包含已经连接的网络服务)
+				-n 用端口号来显示服务，而不是服务名
+				-p 列出该服务的进程ID(PID)
+				-a 显示全部启动的进程
+
+2、RPM包服务管理
+	1）独立服务的管理
+		默认安装位置：
+			/etc/init.d/		启动脚本位置
+			/etc/sysconfig/		初始化环境配置文件位置
+			/etc/				配置文件位置
+			/etc/xinetd.conf 	xinetd配置文件
+			/etc/xinetd.d/ 		基于xinetd服务的启动脚本
+			/var/lib/			服务产生的数据
+			/var/log/			日志
+		独立服务的启动
+			/etc/init.d/独立服务名
+				start | stop | restart | status
+			service 独立服务名(扫描/etc/init.d/下，只有Redhat才可以使用这个命令)
+				start | stop | restart | status
+		独立服务的自启动
+			| chkconfig [--level 运行级别] [独立服务名] [on|off]
+			| 修改/etc/rc.d/rc.local
+			| 使用ntsysv命令管理自启动
+	2）基于xinetd服务的管理
+		安装xinetd服务：
+			yum -y install xinetd
+		xinetd服务的启动
+			vim /etc/xinetd.d/rsync
+				service rsync
+				{
+					flags	=REUSE |标志为REUSE,设定TCP/IP socket可重用
+					socket_type = stream |使用TCP协议数据包
+					wait = no |允许多个连接同事连接
+					user = root |启动服务的用户为root
+					server =/usr/bin/rsync |服务的启动程序
+					log_on_failure +=USERID |登录失败后，记录用户的ID
+					disable =no |服务不启动
+				}
+			service xinetd start
+		xinetd服务的自启动
+			chkconfig xinetd on
+				#xinetd服务启动和自启动相通
+
+3、源码包服务管理
+	1）源码包安装服务的启动
+		| 使用绝对路径，调用启动脚本来启动
+	2）源码包的自启动
+		| vim /etc/rc.d/rc.local
+			加入 /usr/local/apache2/bin/apachectl start
+	3）让源码包服务被服务管理命令识别
+		| 能够被service识别：
+			ln -s /usr/local/apache2/bin/apachectl /etc/init.d/apache
+		| 让源码包的apache服务能被chkconfig与ntsysv命令管理自启动：
+			vi /etc/init.d/apache
+				#chkconfig:35 86 76
+				#指定httpd脚本可以被chkconfig命令管理。格式是：chkconfig:运行级别 启动顺序 关闭顺序
+				#description:
+				#服务顺序级别目录：/etc/rc3.d/S*(启动) K*(关闭)
+			chkconfig --add apache
+			

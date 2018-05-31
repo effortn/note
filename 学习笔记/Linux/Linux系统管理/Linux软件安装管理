@@ -1,0 +1,198 @@
+Linux软件安装管理
+	
+1、简介：
+	软件包分类：
+		| 源码包
+			脚本安装包
+		| 二进制包（RPM包、系统默认包）
+	源码包：
+		优点：
+			| 开源，如果有足够能力，可以修改源代码
+			| 可以自由选择所需的功能
+			| 软件是编译安装，更加适合自己的系统，更加稳定也效率更高
+			| 卸载方便
+		缺点：
+			| 安装过程步骤较多，尤其安装较大的软件集合
+			| 编译过程时间较长，安装比二进制安装时间长
+	RPM包：
+		优点：
+			| 包管理系统简单
+			| 安装速度快
+		缺点：
+			| 经过编译，不再能开到源代码
+			| 功能选择不如源码包灵活
+			| 依赖性
+			| 效率不如源码包
+
+2、RPM命令管理
+	1）RPM包在系统光盘中
+	2）RPM包命名规则
+		httpd-2.2.15-15.el6.centos.1.i686.rpm
+		- httpd 软件包名
+		- 2.2.15 软件版本
+		- 15 软件发布次数
+		- el6.centos 适合的Linux平台
+		- i686 适合的硬件平台
+		- rpm rpm包扩展名
+	3）RPM包依赖性
+		- 树形依赖：a -> b -> c
+		- 环形依赖：a -> b -> c -> a
+		- 模块依赖：模块依赖，查询网站：www.rpmfind.net
+	4）包名与包全名
+
+	5）RPM安装
+		| rpm -ivh 包全名
+		| 选项：
+			- -i(install) 安装
+			- -v(verbose) 显示详细信息
+			- -h(hash) 显示进度
+			- --nodeps 不检测依赖性
+	6）RPM包升级
+		| rpm -Uvh 包全名
+		| 选项：
+			- -U(upgrade) 升级
+	7）RPM包卸载
+		| rpm -e 包名
+		| 选项：
+			- -e(erase) 卸载
+			- --nodeps 不检查依赖性
+	8）RPM包查询
+		查询是否安装：
+			| rpm -q 包名
+				#查询包是否安装 -q(query) 查询
+			| rpm -qa
+				#查询所有已经安装的rpm包 -a(all) 所有
+			常用命令：rpm -qa | grep httpd
+		查询软件包详细信息：
+			| rpm -qi 包名
+			| 选项：
+				- -i(information) 查询软件信息
+				- -p(package) 查询未安装包信息
+		查询包中文件安装位置
+			| rpm -ql 包名
+			| 选项：
+				- -l(list) 列表
+				- -p(package) 查询未安装包信息
+			附：RPM包默认安装位置
+				/etc/			配置文件安装目录
+				/usr/bin/		可执行的命令安装目录
+				/usr/lib/		程序所使用的函数库保存位置
+				/usr/share/doc	基本的软件使用手册保存位置
+				/usr/share/man	帮助文件保存位置
+		查询系统文件属于哪个RPM包
+			| rpm -qf 系统文件名
+			| 选项：
+				- -f(file) 查询系统文件属于哪个软件包
+		查询软件包的依赖性
+			| rpm -qR 包名
+			| 选项：
+				- -R(requires) 查询软件包的依赖性
+				- -p(package) 查询未安装包信息
+	9）RPM效验
+		| rpm -V 已安装的包名
+		| 选项：
+			- -V(verify) 校验指定RPM包中的文件
+		附：验证内容中的8个信息的具体内容如下：
+			S 	文件大小是否改变
+			M 	文件的类型或文件的权限（rwx）是否被改变
+			5	文件MD5效验和是否改变（可以看出文件内容是否改变）
+			D 	设备的主从代码是否改变
+			L 	文件路径是否改变
+			U 	文件的属主（所有者）是否改变
+			G 	文件的属组是否改变
+			T	文件的修改时间是否改变
+		附：文件类型：
+			c 	配置文件（config file）
+			d 	普通文档（documenttation）
+			g 	"鬼"文件（ghost file），很少见，就是该文件不应该被这个RPM包包含
+			L 	授权文件（licese file）
+			r 	描述文件（read me）
+	10）RPM包中文件提取
+		rpm2cpio 包全名 | cpio -idv .文件绝对路径
+			-rpm2cpio	#将rpm包转换为cpio格式的命令
+			-cpio		#是一个标准工具，它拥有创建软件文档文件和从文档文件中提取文件
+				| cpio 选项 < [文件|设备]
+				| 选项：
+					- -i 	copy-in模式，还原
+					- -d 	还原时自动新建目录
+					- -v 	显示还原过程
+
+3、yum在线安装
+	1）yum源文件
+		vi /etc/yum.repos.d/CentOS-Base.repo
+		-[base]			容器名称，一定要放在[]中
+		-name			容器说明，可以自己随便写
+		-mirrorlist		镜像站点，这个可以注释掉
+		-baseurl		我们的yum源服务器的地址。默认是CentOS官方的yum源服务器，是可以使用的，如果觉得慢可改成国内yum源地址
+		-enable			此容器是否生效，如果不写或写成enable=1都是生效，写成enable=0就是不生效
+		-gpgcheck		如果是1是指RPM的数字证书生效，如果是0则不生效
+		-gpgkey			数字证书的公钥文件保存位置。不用修改
+	2）光盘搭建yum源
+		1、 挂载光盘：
+			mkdir /mnt/cdrom	#建立挂载点
+			mount /dev/cdrom /mnt/cdrom		#挂载光盘
+		2、 使网络yum源失效
+			cd /etc/yum.repos.d/	#进入yum源目录
+			mv CentOS-Base.repo CentOS-Base.repo.bak	#修改yum源文件后缀名，使其失效
+		3、使光盘yum源生效
+			vim CentOS-Media.repo
+				-[c6-media]
+				-name=CentOS-$releasever - Media
+				-baseurl=file:///mnt/cdrom				#地址为光盘挂载地址
+				-#		file:///media/cdrom/
+				-#		file:///media/cdrecorder/		#注释这两个不存在的地址
+				-gpgcheck=1
+				-enable=1		#把enable=0改为enable=1，让这个yum源配置文件生效
+				-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6
+	3）yum命令
+		| 查询
+			yum list			#查询所有可用软件包列表
+			yum search 关键字	#搜索服务器上所有和关键字相关的包
+		| 安装
+			| yum -y install 包名
+			| 选项
+				- install		安装
+				- -y			自动回答yes
+		| 升级
+			| yum -y update [包名]
+			| 选项：
+				- update		升级
+				- -y 			自动回答yes
+		| 卸载
+			| yum -y remove 包名
+			| 选项：
+				- remove		卸载
+				- -y 			自动回答yes
+			（服务器使用最小化安装，用什么软件安装什么，尽量不卸载）
+	4）YUM软件组管理命令
+		| yum grouplist					#列出所有可用的软件组列表
+		| yum groupinstall 软件组名		#安装指定软件组，组名可以由grouplist查询出来
+		| yum groupremove 软件组名		#卸载指定软件组
+			（LANG=en_US/LANG=zh_CN.utf6）
+
+4、源码包安装
+	1）安装准备：
+		| 安装C语言编译器
+		| 下载源码包
+	2）安装注意事项
+		| 源代码保存位置：/usr/local/src/
+		| 软件安装位置：/usr/local/
+		| 安装报错：安装停止，并出现error，warning，no
+	3）源码包安装
+		| 解压缩源码包
+		| 进入解压缩目录
+		| ./configure 软件配置与检查
+			- 定义需要的功能选项
+			- 检测系统环境是否符合安装要求
+			- 把定义好的功能选项和检测系统环境的信息都写入Makefile文件，用于后续的编辑
+		| make 编译
+			- make clean
+		| make install 编译安装
+
+5、脚本安装包
+	| 所谓的一键安装包，实际上还是安装的源码包与RPM包，只是把安装过程写成了脚本，便于初学者安装
+	| 优点：简单、快速、方便
+	| 缺点：
+		- 不能定义安装软件的版本
+		- 不能定义所需要的软件功能
+		- 源码包的优势丧失

@@ -127,3 +127,25 @@ Spring Cloud
 			| ServerListFilter
 
 	5）多模块开发
+
+	6）同步or异步
+		- 消息中间件：
+			| RabbitMQ
+			| Kafka
+			| ActiveMQ
+
+6、统一配置中心
+	1）为什么需要统一配置中心
+		| 方便维护
+		| 配置内容安全与权限
+		| 优化更新配置项目需要重启
+	2）配置中心架构
+		远端git -->  config-server  -->  order(config-client)
+									-->  product(config-client)
+									<-->  本地git
+	3）SpringCloud Config配置
+		| @Enable
+		| bootstrap.yml
+	4）SpringCloud Bus自动刷新配置
+		| RabbitMQ
+		| Git : WebHooks

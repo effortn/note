@@ -2,6 +2,9 @@ Spring Boot 2.0
 
 1、Spring Boot简介
 	Spring Boot 的角色
+		| Spring组件的装配
+		| 容器嵌入（tomcat、jetty、）
+		| 生产特性（运维整合）
 		Spring Frame --> Spring Boot --> Spring Cloud
 	2.0新特性
 		编程语言：Java 8+、 Kotlin
@@ -30,8 +33,20 @@ Spring Boot 2.0
 				表示层：web
 			| 子模块依赖管理（<dependecyManagement>）
 		编码：
-
+			略
 		项目打包：
 			| jar包：
-				pom:<configuration><mainClass></configuration></mainClass>
+				pom:<plugin><configuration><mainClass></configuration></mainClass></plugin>
 				mvn -Dmaven.test.skip -U clean package
+			| war包：
+				增加webapp/WEB-INFO/web.xml
+				修改<packaging>war</packaging>
+				pom:<plugin><configuration><mainClass></configuration></mainClass></plugin>
+				mvn -Dmaven.test.skip -U clean package
+
+	3）运行模式
+		| IDEA方式
+		| JAR/WAR方式
+		| Maven插件方式：
+			mvn -Dmaven.test.skip -U clean install
+			mvn spring-boot:run
